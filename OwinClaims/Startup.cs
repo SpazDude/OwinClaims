@@ -14,6 +14,8 @@ namespace WebApplication1
 {
     public class Startup
     {
+        private const string AuthenticationType = "WS-Fed Auth (Primary)";
+
         public void Configuration(IAppBuilder app)
         {
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
@@ -22,43 +24,43 @@ namespace WebApplication1
 
             app.UseWsFederationAuthentication(new WsFederationAuthenticationOptions
             {
-                AuthenticationType = "WS-Fed Auth (Primary)",
-                Wtrealm = ConfigurationManager.AppSettings["app:URI"],                
+                AuthenticationType = AuthenticationType,
+                Wtrealm = ConfigurationManager.AppSettings["app:URI"],
                 MetadataAddress = ConfigurationManager.AppSettings["wsFederation:MetadataEndpoint"],
             });
 
-            AuthenticateAllRequests(app, "WS-Fed Auth (Primary)");
+            app.UseErrorPage();
 
-            app.Run(context =>
-            {
-                var builder = new StringBuilder();
-                var identity = (ClaimsIdentity)context.Request.User.Identity;
-                foreach (var claim in identity.Claims)
-                {
-                    builder.AppendFormat("{0} : {1}", claim.Type, claim.Value);
-                    builder.AppendLine();
-                }
-                context.Response.ContentType = "text/plain";
-                return context.Response.WriteAsync(builder.ToString());
-            });
-        }
-
-        private static void AuthenticateAllRequests(IAppBuilder app, params string[] authenticationTypes)
-        {
             app.Use((context, continuation) =>
             {
-                if (context.Authentication.User != null &&
-                    context.Authentication.User.Identity != null &&
-                    context.Authentication.User.Identity.IsAuthenticated)
+                if (context.Authentication.User?.Identity != null &&
+                    context.Authentication.User.Identity.IsAuthenticated ||
+                    context.Request.Path.Value != "/secure")
                 {
                     return continuation();
                 }
-                else
-                {
-                    context.Authentication.Challenge(authenticationTypes);
-                    return Task.Delay(0);
-                }
+                context.Authentication.Challenge(AuthenticationType);
+                return Task.Delay(0);
             });
+
+            app.Use((context, continuation) =>
+            {
+                if (context.Request.Path.Value == "/secure")
+                {
+                    var builder = new StringBuilder();
+                    var identity = (ClaimsIdentity)context.Request.User.Identity;
+                    foreach (var claim in identity.Claims)
+                    {
+                        builder.AppendFormat("{0} : {1}", claim.Type, claim.Value);
+                        builder.AppendLine();
+                    }
+                    context.Response.ContentType = "text/plain";
+                    return context.Response.WriteAsync(builder.ToString());
+                }
+                return continuation();
+            });
+
+            app.UseWelcomePage();
         }
     }
 }

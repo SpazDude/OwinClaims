@@ -27,6 +27,14 @@ namespace IdentityService.Config
                     //    { "given_name", ClaimTypes.GivenName },
                     //    { "email", ClaimTypes.Email }
                     //}
+                },
+                new RelyingParty
+                {
+                    Realm = "http://localhost:44578/",
+                    Name = "AspNetClient",
+                    Enabled = true,
+                    ReplyUrl = "http://localhost:44578/",
+                    IncludeAllClaimsForUser = true
                 }
             };
         }
