@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>Relay State</title>
+    <meta charset="utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+    <script type="text/javascript">
+        var app = angular.module('app', []);
+
+        app.controller('RelayState', ['$scope',
+            function RelayState($scope) {
+                $scope.idp = "https://adfs.doubleline.us/adfs/ls/idpinitiatedsignon.aspx";
+                $scope.rpid = "https://76.227.150.19";
+                $scope.relayState = "https://localhost:44333/secure";
+                $scope.getRelayStateURL = function () {
+                    var _rpid = window.encodeURIComponent($scope.rpid);
+                    var _relayState = window.encodeURIComponent($scope.relayState);
+                    var _url = "RPID=" + _rpid + "&RelayState=" + _relayState;
+                    return $scope.idp + "?RelayState=" + window.encodeURIComponent(_url);
+                };
+            }
+        ]);
+    </script>
+</head>
+<body>
+    <!-- ReSharper disable once Html.PathError -->
+    <a href="/secure">Secure web page</a>
+    <div ng-controller="RelayState">
+        <p>
+            <label for="txtIdp">idp: </label>
+            <input id="txtIdp" type="text" ng-model="idp" placeholder="Enter the IDP initiated sign on URL here">
+        </p>
+        <p>
+            <label for="txtRpid">rpid: </label>
+            <input id="txtRpid" type="text" ng-model="rpid" placeholder="Enter the relying party's identifier here">
+        </p>
+        <p>
+            <label for="txtRelay">Relay State: </label>
+            <input id="txtRelay" type="text" ng-model="relayState" placeholder="Enter the relay state here">
+        </p>
+        <a href="{{getRelayStateURL()}}">{{getRelayStateURL()}}</a>
+    </div>
+</body>
+</html>

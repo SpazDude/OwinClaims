@@ -13,10 +13,10 @@ namespace IdentityService.Config
             {
                 new RelyingParty
                 {
-                    Realm = "https://localhost:44300/",
+                    Realm = "https://localhost:44333/",
                     Name = "AdfsClient",
                     Enabled = true,
-                    ReplyUrl = "https://localhost:44300/",
+                    ReplyUrl = "https://localhost:44333/",
                     TokenType = TokenTypes.Saml2TokenProfile11,
                     TokenLifeTime = 1,
                     IncludeAllClaimsForUser = true,

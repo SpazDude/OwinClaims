@@ -2,11 +2,14 @@
 using Owin;
 using Microsoft.Owin.Security.WsFederation;
 using System.Configuration;
+using System.IO;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using System.Threading.Tasks;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.StaticFiles;
 
 [assembly: OwinStartup(typeof(WebApplication1.Startup))]
 
@@ -30,6 +33,12 @@ namespace WebApplication1
             });
 
             app.UseErrorPage();
+
+            app.UseFileServer(new FileServerOptions
+            {
+                EnableDefaultFiles = true,
+                EnableDirectoryBrowsing = false,
+            });
 
             app.Use((context, continuation) =>
             {

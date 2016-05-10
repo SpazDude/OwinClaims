@@ -13,11 +13,16 @@ namespace IdentityService
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.ColoredConsole()
                 .CreateLogger();
+            
+            var options = new StartOptions();
+            options.Urls.Add("https://localhost:44300");
+            options.Urls.Add("https://127.0.0.1:44300");
+            options.Urls.Add("https://192.168.1.9:44300");
 
-            const string url = "https://localhost:44333";
-            using (WebApp.Start<Startup>(url))
+            using (WebApp.Start<Startup>(options))
             {
-                Console.WriteLine("\n\nServer listening at {0}. Press enter to stop", url);
+                var urls = string.Join(", ", options.Urls);
+                Console.WriteLine("\n\nServer listening at {0}. Press enter to stop", urls);
                 Console.ReadLine();
             }
         }
