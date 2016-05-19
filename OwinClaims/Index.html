@@ -4,26 +4,214 @@
     <title>Relay State</title>
     <meta charset="utf-8" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-    <script type="text/javascript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.5/angular.js"></script>
+    <style type="text/css">
+        a {
+            word-wrap: break-word;
+        }
+
+        textarea {
+            font-family: "Lucida Console", monospace, sans-serif;
+            font-size: 12px;
+        }
+    </style>
+<script type="text/javascript">
         var app = angular.module('app', []);
 
-        app.controller('RelayState', ['$scope',
-            function RelayState($scope) {
+        app.controller('RelayState', ['$scope', '$http', '$sce',
+            function RelayState($scope, $http, $sce) {
                 $scope.idp = "https://adfs.doubleline.us/adfs/ls/idpinitiatedsignon.aspx";
-                $scope.rpid = "https://76.227.150.19";
+                $scope.rpid = "https://saml.doubleline.us/idp/shibboleth";
                 $scope.relayState = "https://localhost:44333/secure";
+                
                 $scope.getRelayStateURL = function () {
-                    var _rpid = window.encodeURIComponent($scope.rpid);
-                    var _relayState = window.encodeURIComponent($scope.relayState);
-                    var _url = "RPID=" + _rpid + "&RelayState=" + _relayState;
-                    return $scope.idp + "?RelayState=" + window.encodeURIComponent(_url);
+                    var _relayState = "RPID=" + $scope.rpid + "&RelayState=" + $scope.relayState;
+                    var _outerRelayState = window.encodeURIComponent(_relayState);
+                    return $sce.trustAsResourceUrl($scope.idp + "?RelayState=" + _outerRelayState);
                 };
+
+                $scope.getEncodedSaml = function () {
+                    return window.btoa($scope.samlResponse);
+                };
+
+                $scope.samlResponse = `<saml2p:Response Destination="https://adfs.doubleline.us/adfs/ls/"
+                 ID="_5b933f7b3c0c37fc4242170af70b6a58"
+                 InResponseTo="id-ce34c602-d3e8-4422-942c-c8e2df5cc464"
+                 IssueInstant="2016-05-18T18:28:03.785Z"
+                 Version="2.0"
+                 xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+                 >
+    <saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">https://saml.doubleline.us/idp/shibboleth</saml2:Issuer>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+            <ds:Reference URI="#_5b933f7b3c0c37fc4242170af70b6a58">
+                <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                <ds:DigestValue>sFEywMx4rAtHXMjstSPXM5tgMDoTfCv1hd93R+TPQms=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>
+iFAdudzovxVZiVKvAQQKYRAoI97EpxcirewoCZomD/uGltwy0y1NUWC9mQAsCQXtO18MDg7kaVFN
+Ukopdy57wm17ttOM3gV98mPN9TcFMu79CrVPASpUgcZoK7Zq2rMLArNlvbD/+jBYl+6yc50G2kZi
+aSwAkN2SbaXnMfHLMLYY/MbdOLKDTiS45CBLwCLG+syeATla6BhS2oNZtkUO7229DEERcBB9Qh2g
+N8nuA2KS6OB/h81UOLrvQYNzZ5gscsclwd0kADS3fyEQglU3xEEuuobiNGGzpw9CkWDKjuEyYktJ
+iiGzwKpHMYVfxGJHRah2M38eRdU5A4K5+i8Fbg==
+</ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:X509Data>
+                <ds:X509Certificate>MIIDLzCCAhegAwIBAgIUIkYqWEZ8A7oiV5/yTQk9Y5IrLn0wDQYJKoZIhvcNAQELBQAwHDEaMBgG
+A1UEAwwRaWRwLmRvdWJsZWxpbmUudXMwHhcNMTYwNTE3MjA1MzI5WhcNMzYwNTE3MjA1MzI5WjAc
+MRowGAYDVQQDDBFpZHAuZG91YmxlbGluZS51czCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBAJfhopEmNIYa/BATDVceQkjcl/jLIk4Kj0lBs9Ntr58NeGWpuyLxX63jCyT/XThQYueaRCgZ
+VfT6z6wp+V4MnDKd+vpUEWjEYLUy+zVlYFnN1WTlcKxCzfAgoi2Gfp4It+Z7Xd4jA8zmMrT7MrWv
+oOwM//IRFsgM0uDtF8xiBwxxWXGwWB5vTEXyY75MDoEwc8qefFTAUUlBk9BtdrkRpO5EO7veJ90Z
+1tfViHAdLoCb4reJ1SQ8la6QZRykbT4xZ+qKRPkUcBsmeyuJ0qG3qdm8GA+36DO9F4JznWR/+wb4
+Uh+YwgwjhlAx4WNrwJsYnIbQfva4pLQ4jtceW/dwgj0CAwEAAaNpMGcwHQYDVR0OBBYEFBt2MT9W
+zKc1rtV0uLUKl8bo+X2FMEYGA1UdEQQ/MD2CEWlkcC5kb3VibGVsaW5lLnVzhihodHRwczovL2lk
+cC5kb3VibGVsaW5lLnVzL2lkcC9zaGliYm9sZXRoMA0GCSqGSIb3DQEBCwUAA4IBAQAYH0oND9+7
+s+gvvtp7zNXVEKnTW7Uqdzg7ltp62veQOd3xbOaskzddoyVUnwxeS7qMpu2riz6k+Wmyt+9RjFQj
+AjYpSDE7gIAv8k5zBo9Dqbr5c4sJgmIFE/frILpwSpTyP2TwSA20prTltd6BTnCwp8O1VUHpXQJw
+9PO0TQNPOJutjiTMfDpiwLtDcs0vWpm0HfffUZKC1sK6sPuf4cza7t48YQQG9oTDCJkt9ejn3Zzx
+2HPnV4oAeL1dlK6GvnWzera6gAAZw+j8h5TBVLfWTa6k3kRDP9Zhh1YBr21f9GpznDHOfBfvcfNf
+RFR/WU7E9XJ9dEfnWhangm7jPTt7</ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <saml2p:Status>
+        <saml2p:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
+    </saml2p:Status>
+    <saml2:EncryptedAssertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+        <xenc:EncryptedData Id="_4ce62ee6ddcecb0e1e8963131425f7d2"
+                            Type="http://www.w3.org/2001/04/xmlenc#Element"
+                            xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                            >
+            <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"
+                                   xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                                   />
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <xenc:EncryptedKey Id="_c53eef86b3ca60fc44d5823efc8d5240"
+                                   Recipient="http://adfs.doubleline.us/adfs/services/trust"
+                                   xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                                   >
+                    <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"
+                                           xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                                           >
+                        <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"
+                                         xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                         />
+                    </xenc:EncryptionMethod>
+                    <ds:KeyInfo>
+                        <ds:X509Data>
+                            <ds:X509Certificate>MIIC4jCCAcqgAwIBAgIQXhd1P4zJmZdI307gQnurZDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQD
+EyJBREZTIEVuY3J5cHRpb24gLSBmcy5kb3VibGVsaW5lLnVzMB4XDTE1MTAwOTE1Mjk0NloXDTE2
+MTAwODE1Mjk0NlowLTErMCkGA1UEAxMiQURGUyBFbmNyeXB0aW9uIC0gZnMuZG91YmxlbGluZS51
+czCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALX+b2khhpHmOcNYOfVUYbj4x0f5UcW9
+T+SDEpu99+dn00IwkLNTq5XFmgSjNWAondjutKip6pHtDuLNL7pYSK8qWdCdYgHD2dkwUQwcwwCy
+xFyat8z1GkKw37yOocN/egq4TTAWBcQ8ARZubHhcXt9EHxo37ZiacAnpbzwaxj4vbsXRvx+mHMaU
+Vp0jGdI9VPY8+6xXbrZq37ORCCJPaqJ6yI7TnEdleK93Gx+BNDxMU6Xj7VQidbEI/HaeINNLdmtE
+Rr7qYRwJ13UptzKW4kPxdTao+uLuU6bQcvU6Xo0AkXgjt3vZR9T6gOWML9fQEDkftuJpkNuuuvvU
+h7/pG6kCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAOtZlgaZp07NugY5UrKABJZ9ipuEjwHiIlM9B
+lMuJY5xirsY65tCrKvXXr2rxcoV8rnIXtRoUvA4sPvTbp4TtryEQSvtDjERhV9wXwaEevZZL9Ipr
+k/re7SpD0m6yCwSkmGrGORMnZZ5Sp/J5X3F1a73sPVXkEJKcrkKJKyv4XyP+4fK2BHK/rfheNhmw
+hFQ78DuHehZByAzvIAWdbttIeH991qBwOLv8dJ4Mz+69eyqFAraSYgphSKNe4FGw4jPxBRkYyerJ
+Ofo/PLxtwDZmeoQRZiNn94emrwpdDSobCRRDMpLTuOFq7Bf4fkHk8OtGNLGsuFZG4dFECZPwRq1G
+9A==</ds:X509Certificate>
+                        </ds:X509Data>
+                    </ds:KeyInfo>
+                    <xenc:CipherData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+                        <xenc:CipherValue>QikUaxXxy9778ynh09tU8fobZe2v5IXCYmmE+374Jokjuux63Q3KROh6Z1tL/KDuU2sbIdPDPVFX
+kJ5kXFAj/HhpGWuaOUurF9GA6vl3U/8J5lq++srt5RJ63TBNdM8UWGOMb5MW5K5/9xYtMKxYdkYD
+v4fvzrUa/5NdvqTkEn/KmGOTGl75klspjLchY0OW/BU0LVFeoZH1wQllwxAJzjrqOiZ/LfkUW7Xx
+zt+Oo1ELsEPpKQxIxrOCiKJpy9Amj2l4huWk6f01jOTVaHmy3ayCnGPXQpYw8kN5PtcChQUb5QQv
+bVH4onx85tNtE4npgJt5H4gt/CCoDzMdKPCLJg==</xenc:CipherValue>
+                    </xenc:CipherData>
+                </xenc:EncryptedKey>
+            </ds:KeyInfo>
+            <xenc:CipherData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+                <xenc:CipherValue>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</xenc:CipherValue>
+            </xenc:CipherData>
+        </xenc:EncryptedData>
+    </saml2:EncryptedAssertion>
+</saml2p:Response>`;
             }
         ]);
     </script>
 </head>
-<body role="document">
+<body role="document" ng-app="app">
     <nav class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
@@ -51,25 +239,44 @@
             <div class="panel-body">
                 <div class="form-group">
                     <label for="txtIdp">Identity Provider (IDP)</label>
-                    <input id="txtIdp" class="form-control" type="text" ng-model="idp" placeholder="Enter the IDP initiated sign on URL here">
+                    <input id="txtIdp" class="form-control" type="text" ng-model="idp" placeholder="Enter the IDP initiated sign on URL here" />
                 </div>
                 <div class="form-group">
                     <label for="txtRpid">Relying Party Identifier (RDIP)</label>
-                    <input id="txtRpid" class="form-control" type="text" ng-model="rpid" placeholder="Enter the relying party's identifier here">
+                    <input id="txtRpid" class="form-control" type="text" ng-model="rpid" placeholder="Enter the relying party's identifier here" />
                 </div>
                 <div class="form-group">
                     <label for="txtRelay">Relay State</label>
-                    <input id="txtRelay" class="form-control" type="text" ng-model="relayState" placeholder="Enter the relay state here">
+                    <input id="txtRelay" class="form-control" type="text" ng-model="relayState" placeholder="Enter the relay state here" />
+                </div>
+                <div class="form-group">
+                    <label for="txtSaml">SAML Authorization Response</label>
+                    <textarea id="txtSaml" class="form-control" ng-model="samlResponse" rows="10"></textarea>
                 </div>
             </div>
-        </div><div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Generated Relay State Link</h3>
-            </div>
-            <div class="panel-body">
-                <a href="{{getRelayStateURL()}}">{{getRelayStateURL()}}</a>
-            </div>
         </div>
+        <form action="{{getRelayStateURL()}}" method="post">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Unsolicited Saml Request</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="aSaml">SAML URL</label>
+                        <div>
+                            <a id="aSaml" href="{{getRelayStateURL()}}">{{getRelayStateURL()}}</a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="uueSaml">SAMLResponse</label>
+                        <textarea id="uueSaml" class="form-control" name="SAMLResponse" rows="10">{{getEncodedSaml()}}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </body>
 </html>
