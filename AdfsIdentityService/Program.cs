@@ -15,7 +15,8 @@ namespace IdentityService
                 .CreateLogger();
             
             var options = new StartOptions();
-            options.Urls.Add("https://*:44300");
+            //options.Urls.Add("https://*:44300");
+            options.Urls.Add("https://localhost:44300");
 
             using (WebApp.Start<Startup>(options))
             {
