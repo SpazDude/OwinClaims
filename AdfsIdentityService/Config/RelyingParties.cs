@@ -30,10 +30,10 @@ namespace IdentityService.Config
                 },
                 new RelyingParty
                 {
-                    Realm = "http://localhost:44578/",
-                    Name = "AspNetClient",
+                    Realm = "http://serviceprovider.doubleline.us/",
+                    Name = "Service Provider",
                     Enabled = true,
-                    ReplyUrl = "http://localhost:44578/",
+                    ReplyUrl = "http://localhost:1992/",
                     IncludeAllClaimsForUser = true
                 }
             };
