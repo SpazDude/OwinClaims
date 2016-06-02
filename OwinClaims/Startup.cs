@@ -2,35 +2,26 @@
 using Owin;
 using Microsoft.Owin.Security.WsFederation;
 using System.Configuration;
+using System.IdentityModel.Metadata;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using System.Threading.Tasks;
 using System.Text;
 using System.Security.Claims;
+using Kentor.AuthServices;
+using Kentor.AuthServices.Configuration;
+using Kentor.AuthServices.Owin;
 using Microsoft.Owin.StaticFiles;
 
 [assembly: OwinStartup(typeof(WebApplication1.Startup))]
 
 namespace WebApplication1
 {
-    public class Startup
+    public partial class Startup
     {
-        private const string AuthenticationType = "WS-Fed Auth (Primary)";
-
         public void Configuration(IAppBuilder app)
         {
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
-
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
-
-            app.UseWsFederationAuthentication(new WsFederationAuthenticationOptions
-            {
-                AuthenticationType = AuthenticationType,
-                Wtrealm = ConfigurationManager.AppSettings["app:URI"],
-                MetadataAddress = ConfigurationManager.AppSettings["wsFederation:MetadataEndpoint"],
-            });
-
-            
+            ConfigureWsFederationAuth(app);
 
             app.UseErrorPage();
 
@@ -48,7 +39,7 @@ namespace WebApplication1
                 {
                     return continuation();
                 }
-                context.Authentication.Challenge(AuthenticationType);
+                context.Authentication.Challenge(FedAuth);
                 return Task.Delay(0);
             });
 
